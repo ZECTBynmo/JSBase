@@ -5,45 +5,74 @@
 		<!-- Scripts -->	
 		<!-- ------------------------------------------------------------------------------------------------ -->
 		<script src="jquery-1.7.1.min.js" type="text/javascript"></script>
+		<script src="jquery-ui-1.8.21.custom.min.js" type="text/javascript"></script>
+		<script src="jquery.ui.chatbox.js" type="text/javascript"></script>
 		<script src="LongPoll.js" type="text/javascript"></script>
-		<script>
+		<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/themes/black-tie/jquery-ui.css" type="text/javascript"></script>
+		
+		
+		<link type="text/css" href="jquery.ui.chatbox.css" rel="Stylesheet" />	
+		
+		<script type="text/javascript">
 			var longPoll = new LongPoll();
 			
 			var eventCallback = {
 				eventName: "newChat",
 				callback: displayResults
 			}
+			
 			longPoll.addEventCallback( eventCallback );
+			
 			$(document).ready(function() {
+				// Create our chat box
+				var box = null;
+				
+				if( box ) {
+					//box.chatbox("option", "boxManager").toggleBox();
+				} else {
+					box = $("#chat_div").chatbox( {
+						id:"chat_div",
+						user:{name : "Mike"},
+						title : "test chat",
+						messageSent : function(id, user, msg) {
+							// $("#log").append(id + " said: " + msg + "<br/>");
+							// $("#chat_div").chatbox("option", "boxManager").addMsg(id, msg);
+							sendChat( msg, { name: "Mike" } );
+						}
+					});
+				}
+				
 				// Start up the event loop
-				longPoll.eventLoop();
+				longPoll.eventLoop();				
 			});
 		
 			function displayResults( results ) {
 				$('#resultList').empty();
 				
-				for( var iResult in results ) {
-					$("#resultList").append('<li>' + results[iResult] +'</li><br />');
+				for( var iData in results.data ) {
+					$("#resultList").append('<li>' + iData + ": " + results.data[iData] +'</li><br />');
 				}
+				
+				$("#chat_div").chatbox("option", "boxManager").addMsg(results.data["userInfo[name]"], results.data.text);
 			} // end displayResults()
 			
-			function refreshResults() {
+			function sendChat( text, userInfo ) {
 				var newChat = {
-					text: "test",
-					userInfo: { name: "testName" },
+					text: text,
+					userInfo: userInfo,
 					time: new Date()
 				}
 				jQuery.get("/newChat", newChat, function (data, status) {
 					if (status != "success") return;
 					//displayResults( data );
 				}, "json");
-			} // end refreshResults()
+			}
 		</script>
 	</head>
 	<body>
-		<h1 align='center'>Press the button to send your request</h1>
-		
 		<ol id="resultList"></ol>
-		<input id="showResultsButton" type="button" onClick="refreshResults();" value="Make Request"/>
+		<div id="chat_div"></div>
+		<hr />
+		<div id="log"></div>
 	</body>	
 </html>
