@@ -14,7 +14,8 @@ var globalNamespace = {};
 var createServer = require("http").createServer,
 	readFile = require("fs").readFile,
 	url = require("url"),
-	qs = require("querystring");
+	qs = require("querystring"),
+	mime = require("./MimeLookup");
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -113,7 +114,8 @@ Server.prototype.createGenericHandler = function( callback, isDataExpected ) {
 // Create a response handler for a static file
 Server.prototype.createFileHandler = function( filename ) {
 	var body, headers;
-	var content_type = "text/html";
+	
+	var content_type = mime.lookupExtension( extname(filename) );
 	console.log( "Creating handler for file: " + filename );
 	
 	function loadResponseData(response) {
