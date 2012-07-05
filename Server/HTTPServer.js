@@ -80,13 +80,14 @@ function Server( port, host ) {
 Server.prototype.createGenericHandler = function( callback, isDataExpected ) {
 	if( typeof(isDataExpected) === "undefined" )
 		isDataExpected = false;
-
-	var handler = function(request, response) {
+	
+	// Create our handler
+	var handler = function(request, response) {		
 		// Create a function that will send some data to the client.
 		// If we don't want to respond right away, we can store this function
 		// and it will stay valid until we need it, with all the relevant info
 		// stored in closure.
-		var respondToClient = function( reponseData ) {
+		var respondToClient = function( responseData ) {
 			try {
 				response.respondJSON( 200, responseData );
 			} catch( error ) {
@@ -96,9 +97,12 @@ Server.prototype.createGenericHandler = function( callback, isDataExpected ) {
 					response.respondJSON( 200, {} );
 			}
 		}
-		
+	
+		// Grab our request data if there is any
+		var data = qs.parse(url.parse(request.url).query);
+	
 		// Give that function to the module/code using the generic handler
-		callback( respondToClient, qs.parse(url.parse(request.url).query) );
+		callback( respondToClient, data );
 	} // end handler()
 	
 	return handler;
