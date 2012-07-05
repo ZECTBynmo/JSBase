@@ -1,7 +1,7 @@
 JSBase
 ======
 
-*All base functionality for basic applications*
+*Base functionality for basic applications*
 
 Server
 * Long Poll			-- Effectively allows the server to push data down to the client
