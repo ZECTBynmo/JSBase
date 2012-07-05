@@ -11,5 +11,5 @@ var server = httpServerImpl.createNewServer( 1111, null ),
 server.addRequestHandler("/", server.createFileHandler("index.html"));
 
 // Send scripts to client
-server.addRequestHandler("/jquery-1.7.1.min.js", server.createFileHandler("../../Client/jquery-1.7.1.min.js"));
+server.addRequestHandler("/jquery-1.7.1.min.js", server.createFileHandler("../../Common/jquery-1.7.1.min.js"));
 server.addRequestHandler("/LongPoll.js", server.createFileHandler("../../Client/LongPoll.js"));
