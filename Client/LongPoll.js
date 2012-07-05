@@ -1,4 +1,40 @@
 //////////////////////////////////////////////////////////////////////////
+// LongPoll - Server Side
+//////////////////////////////////////////////////////////////////////////
+//
+// We are trying to setup a system where we (the server) can push messages
+// to a client dependably. 
+//
+// Here are the possible series of events
+//
+// 1) Client requests updates about server events (chat from other users, etc...)
+// 2) Server gets a callback to respond to the client with some data/object
+// 3) Server looks for updates for that client/user
+// 		A) Server finds events that have happened since the client requested it
+// 			a) Server creates an object with all of the events
+//			b) Server calls the response callback with the events object
+// 		B) Server doesn't find any events
+//			a) Server stores the callback for later (when an event occurs)
+//			b) (much later) event happens, call stored callbacks with event data
+//
+/* ----------------------------------------------------------------------
+													Object Structures
+-------------------------------------------------------------------------
+	var callback = { 			// Callback structure
+		eventName: someName,						// The name of the event we're responding to
+		callback: someFunction( event )				// The function with which we'll respond
+	}		
+	
+	var event = {				// Event structure
+		name: someName, 							// The name of this event (must be unique)
+		time: someTime,								// The time at which this event was triggered
+		data: { 
+			someName: someData,						// We want to be able to index into data with the name of the piece of data we're expecting
+			someOtherName: someOtherData			// Ex: var something = event.data["whateverMyDataIsCalled"];
+		}			
+	}
+*/
+//////////////////////////////////////////////////////////////////////////
 // Constructor
 function LongPoll() {
 	this.eventCallbacks = new Array();									// Our list of responses to events
@@ -6,33 +42,20 @@ function LongPoll() {
 	this.onTooManyErrors = function() {};								// Our response to having too many errors	
 	this.userInfo = {};													// Our description to the server (ID number, name, last message time, whatever)
 	
-	/* /////////////////////////////// 
-		var callback = { 			// Callback structure
-			eventName: someName,						// The name of the event we're responding to
-			callback: someFunction( event )				// The function with which we'll respond
-		}		
-		
-		var event = {				// Event structure
-			name: someName, 							// The name of this event (must be unique)
-			time: someTime,								// The time at which this event was triggered
-			data: { 
-				someName: someData,						// We want to be able to index into data with the name of the piece of data we're expecting
-				someOtherName: someOtherData			// Ex: var something = event.data["whateverMyDataIsCalled"];
-			}			
-		}
-	*/
-	
 } // end LongPoll()
+
 
 var MAX_ERRORS = 2;
 var ERROR_TIMEOUT_MS = 10*1000;
 var exists = function( someItem ) { return typeof(someItem) === "undefined"; }
+
 
 //////////////////////////////////////////////////////////////////////////
 // Add a callback that we'll call in response to some event
 LongPoll.prototype.addEventCallback = function( eventCallback ) {
 	this.eventCallbacks.push( eventCallback );
 } // end addEventCallback();
+
 
 //////////////////////////////////////////////////////////////////////////
 // This is our main event loop
