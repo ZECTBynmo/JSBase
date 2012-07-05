@@ -28,8 +28,8 @@
 	
 	var event = {
 		name: someName, 							// The name of this event (must be unique)
+		module: someModule,							// The name of the module that triggered this event
 		time: someTime,								// The time at which this event was triggered
-		validateUser: someValidationFn(user, time), // The function we call to make sure this event is valid for this user
 		data: { 
 			someName: someData,						// We want to be able to index into data with the name of the piece of data we're expecting
 			someOtherName: someOtherData			// Ex: var something = event.data["whateverMyDataIsCalled"];
@@ -53,7 +53,9 @@ var createServer = require("http").createServer;
 var readFile = require("fs").readFile;
 var url = require("url");
 var exists = function( someItem ) { return typeof(someItem) === "undefined"; }
-var REQUEST_LIFETIME_MS = 
+var REQUEST_LIFETIME_MS = 30000;
+var DBG = true;
+var log = function(text) { if(DBG) console.log(text); }
 
 //////////////////////////////////////////////////////////////////////////
 // Constructor
@@ -61,33 +63,32 @@ function LongPoll( httpServer ) {
 	this.eventUpdates = new Array();												// Our collection of events that we need to update the client about
 	this.queuedUserRequests = new Array();											// Our collection of user request callbacks that are sitting waiting for events
 	this.httpServer = httpServer;													// Our HTTP server
-	this.validateUserInfo = function( userInfo ) { return exists(userInfo); };		// Our user info validation function. This can change, to
-																					// change how a user is validated for responses
 	
 	// Add our long poll request handler to the server
-	server.addRequestHandler( "/longPollRequest", server.createGenericHandler(function( respondToClient ) {
-		var userInfo = qs.parse(url.parse(request.url).query).userInfo;
-		var requestTime = qs.parse(url.parse(request.url).query).requestTime;
+	var self = this;
+	httpServer.addRequestHandler( "/longPollRequest", httpServer.createGenericHandler(function( respondToClient, data ) {
+		log( "Got LongPoll request" );
 		
-		// Validate this user
-		var isValidated = this.validateUserInfo( userInfo );
+		var userInfo = data.userInfo;
+		var requestTime = data.requestTime;
 		
-		if( isValidated ) {
-			// Find server event updates relevant to this user
-			var eventsForUser = getUserUpdates( userInfo );
-			
-			// Push this user into our list of queued update callbacks
-			if( !exists(eventsForUser) ) {		
-				var userRequest = {
-					userInfo: userInfo,
-					time: requestTime,
-					respond: respondToClient
-				}
-			
-				this.queuedUserRequests.push( userRequest );
+		// Find server event updates relevant to this user
+		var eventsForUser = self.getUserUpdates( userInfo );
+		
+		// Push this user into our list of queued update callbacks
+		if( !exists(eventsForUser) ) {		
+			var userRequest = {
+				userInfo: userInfo,
+				time: requestTime,
+				respond: respondToClient
 			}
-		} // end if user is validated
-	}));
+		
+			self.queuedUserRequests.push( userRequest );
+		} else {
+			// Give the user the new data
+			userRequest( eventsForUser );
+		}
+	}));	
 	
 	
 	// Clear out old user requests
@@ -108,7 +109,9 @@ function LongPoll( httpServer ) {
 
 //////////////////////////////////////////////////////////////////////////
 // Adds a function to callback for updates from some other module
-LongPoll.prototype.addEventUpdate() = function( event ) {
+LongPoll.prototype.addEventUpdate = function( event ) {
+	log( "Got an event: " + event.name );
+	
 	this.eventUpdates[event.name]= event;
 	
 	// Dispatch event updates to clients who are waiting
@@ -120,7 +123,7 @@ LongPoll.prototype.addEventUpdate() = function( event ) {
 
 //////////////////////////////////////////////////////////////////////////
 // Returns a list of server side event updates since the user requested them
-LongPoll.prototype.getUserUpdates() = function( userInfo, requestTime ) {
+LongPoll.prototype.getUserUpdates = function( userInfo, requestTime ) {
 
 	// We're goign to loop through our collection of events backwards
 	// until we find one that is BEFORE the user's request time.
@@ -152,22 +155,13 @@ LongPoll.prototype.getUserUpdates() = function( userInfo, requestTime ) {
 
 //////////////////////////////////////////////////////////////////////////
 // Respond to queued user requests with new events
-LongPoll.prototype.dispatchQueuedRequests() = function( event ) {
+LongPoll.prototype.dispatchQueuedRequests = function( event ) {
 	for( var iRequest=0; iRequest<this.queuedUserRequests.length; ++iRequest ) {
 		var userRequest = this.queuedUserRequests[iRequest];
-		
-		// Validate the user for this event
-		var isValidated = true;
-		if( exists(event.validateUser) ) {
-			isValidated = event.validateUser( userInfo, requestTime );
-		}
-		
-		if( isValidated ) {
-			// Construct our event response
-			var response = {};
-			response[event.name] = event;
-		
-			userRequest( response );
-		}		
+		// Construct our event response
+		var response = {};
+		response[event.name] = event;
+	
+		userRequest.respond( response );
 	} // end for each user request
 } // end dispatchQueuedRequests()

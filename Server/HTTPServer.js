@@ -11,22 +11,26 @@ var globalNamespace = {};
 
 //////////////////////////////////////////////////////////////////////////
 // Namespace (lol)
-var createServer = require("http").createServer;
-var readFile = require("fs").readFile;
-var url = require("url");
+var createServer = require("http").createServer,
+	readFile = require("fs").readFile,
+	url = require("url"),
+	qs = require("querystring");
 
 
 //////////////////////////////////////////////////////////////////////////
 // Constructor
 function Server( port, host ) {
+	var self = this;
 	this.requestHandlers = {};			// Our list of responses to http requests
 	
 	// Create a server using the built in Node http module and declare our response to client requests
 	this.server = createServer(function (request, response) {
+		if( typeof(self.requestHandlers) === "undefined" ) { console.log("no request handlers"); return; }
+	
 		// Handle GET requests
 		if( request.method === "GET" ) {
 			// Grab the request handler from our map
-			var handler = requestHandlers[url.parse(request.url).pathname] || notFound;
+			var handler = self.requestHandlers[url.parse(request.url).pathname] || notFound;
 
 			// Give the response a function to respond to the request with a JSON object
 			response.respondJSON = function (code, obj) {
@@ -48,7 +52,7 @@ function Server( port, host ) {
 			});
 		 
 			request.on("end", function() {
-				var handler = requestHandlers[url.parse(request.url).pathname] || notFound;
+				var handler = self.requestHandlers[url.parse(request.url).pathname] || notFound;
 
 				response.respondJSON = function (code, obj) {
 					var body = new Buffer( JSON.stringify(obj) );
@@ -62,11 +66,10 @@ function Server( port, host ) {
 				handler( request, response, fullBody );
 			});
 		}
-	}
 	}); // end createServer()	
 	
 	// Listen on the port and host we were given
-	server.listen( port, host );
+	this.server.listen( port, host );
 	console.log("Server at http://" + (host || "localhost") + ":" + port.toString() + "/");
 } // end Server()
 
@@ -84,14 +87,18 @@ Server.prototype.createGenericHandler = function( callback, isDataExpected ) {
 		// and it will stay valid until we need it, with all the relevant info
 		// stored in closure.
 		var respondToClient = function( reponseData ) {
-			if( !isDataExpected || typeof(responseData) === "undefined" )
-				response.respondJSON(200, responseData);
-			else
-				response.respondJSON(400, {error: "Response data expected but undefined"});
+			try {
+				response.respondJSON( 200, responseData );
+			} catch( error ) {
+				if( isDataExpected )
+					response.respondJSON(400, {error: "Response data expected but undefined"});
+				else
+					response.respondJSON( 200, {} );
+			}
 		}
 		
 		// Give that function to the module/code using the generic handler
-		callback( respondToClient );
+		callback( respondToClient, qs.parse(url.parse(request.url).query) );
 	} // end handler()
 	
 	return handler;
@@ -141,6 +148,7 @@ Server.prototype.createFileHandler = function( filename ) {
 //////////////////////////////////////////////////////////////////////////
 // Add a request handler to our map
 Server.prototype.addRequestHandler = function( path, handler ) {
+	console.log( "Adding request handler for " + path );
 	this.requestHandlers[path] = handler;
 }; // end Server.addRequestHandler()
 

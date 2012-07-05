@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 // Constructor
 function LongPoll() {
-	this.eventCallbacks = {};											// Our list of responses to events
+	this.eventCallbacks = new Array();									// Our list of responses to events
 	this.numErrors;														// The number of errors our server has experienced
 	this.onTooManyErrors = function() {};								// Our response to having too many errors	
 	this.userInfo = {};													// Our description to the server (ID number, name, last message time, whatever)
@@ -29,6 +29,12 @@ var ERROR_TIMEOUT_MS = 10*1000;
 var exists = function( someItem ) { return typeof(someItem) === "undefined"; }
 
 //////////////////////////////////////////////////////////////////////////
+// Add a callback that we'll call in response to some event
+LongPoll.prototype.addEventCallback = function( eventCallback ) {
+	this.eventCallbacks.push( eventCallback );
+} // end addEventCallback();
+
+//////////////////////////////////////////////////////////////////////////
 // This is our main event loop
 //
 // We we have sent a request to the server asking for any new updates, 
@@ -47,22 +53,24 @@ LongPoll.prototype.eventLoop = function( eventData ) {
 		return;
 	}
 	
-	// Loop through all of our events
-	for( var iEvent = 0; iEvent < eventData.events.length; ++iEvent ) {
-		var event = eventData.events[iEvent];
-		
-		// Loop through our eventCallbacks and see if we need to respond to this event
-		// Note: we have to loop through all of them, because more than one may be a response
-		// to this event
-		for( var iCallback = 0; iCallback < self.eventCallbacks.length; ++iCallback ) {
-			var callback = self.eventCallbacks[iCallback];
-		
-			// If we find a callback that's listening for this event, call the callback
-			if( callback.eventName === event.name ) {
-				callback.callback( event );
-			}
-		} // end for each callback
-	} // end for each event
+	if( typeof(eventData) != "undefined" && typeof(eventData.events) != "undefined" ) {
+		// Loop through all of our events
+		for( var iEvent = 0; iEvent < eventData.events.length; ++iEvent ) {
+			var event = eventData.events[iEvent];
+			
+			// Loop through our eventCallbacks and see if we need to respond to this event
+			// Note: we have to loop through all of them, because more than one may be a response
+			// to this event
+			for( var iCallback = 0; iCallback < self.eventCallbacks.length; ++iCallback ) {
+				var callback = self.eventCallbacks[iCallback];
+			
+				// If we find a callback that's listening for this event, call the callback
+				if( callback.eventName === event.name ) {
+					callback.callback( event );
+				}
+			} // end for each callback
+		} // end for each event
+	}
 	
 	// Handles errors from requests to the server
 	var onRequestError = function( errorData ) {		
@@ -92,11 +100,9 @@ LongPoll.prototype.eventLoop = function( eventData ) {
 		dataType: "json", 
 		data: { 
 			userInfo: self.userInfo,
-			requestTime: new Date();
+			requestTime: new Date()
 		}, 
 		error: onRequestError,
 		success: onRequestSuccess
 	});
 } // end LongPoll.eventLoop()
-
-
