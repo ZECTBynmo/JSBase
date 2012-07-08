@@ -134,10 +134,10 @@ Server.prototype.createFileHandler = function( filename ) {
 				
 				headers = { "Content-Type": content_type,
 							"Content-Length": body.length
-			};
+				};
 				
-			console.log( "static file " + filename + " loaded" );
-			response();	
+				console.log( "static file " + filename + " loaded" );
+				response();	
 			}
 		});
 	}
@@ -157,6 +157,15 @@ Server.prototype.addRequestHandler = function( path, handler ) {
 	console.log( "Adding request handler for " + path );
 	this.requestHandlers[path] = handler;
 }; // end Server.addRequestHandler()
+
+
+//////////////////////////////////////////////////////////////////////////
+// Add a new generic handler directly to our request handlers
+Server.prototype.addGenericHandler = function( path, callback ) {
+	console.log( "Adding generic request handler for " + path );
+		
+	this.addRequestHandler( path, this.createGenericHandler(callback) );
+}; // end Server.addGenericHandler()
 
 
 //////////////////////////////////////////////////////////////////////////

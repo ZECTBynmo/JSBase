@@ -50,6 +50,8 @@ function Chat( httpServer, longPoll, moduleName, newChatString ) {
 	// Receive new chat events
 	var self = this;
 	console.log( "Chat name is: " + newChatString );
+	
+	// Create a generic request handler to grab new chat data (text, etc)
 	httpServer.addRequestHandler( "/" + newChatString, httpServer.createGenericHandler(function( respondToClient, data ) {
 		// Create a new event to report to LongPoll
 		var event = {
@@ -66,4 +68,23 @@ function Chat( httpServer, longPoll, moduleName, newChatString ) {
 		// give them any data here
 		respondToClient();
 	}));
-} // /*end Chat()*/
+} // end Chat()
+
+//////////////////////////////////////////////////////////////////////////
+// Handle incoming chat events
+Chat.prototype.onNewChat = function( respondToClient, data ) {
+	// Create a new event to report to LongPoll
+	var event = {
+		name: self.newChatString, 	// The name of this event (must be unique)
+		module: self.moduleName,	// The name of the module that triggered this event
+		time: new Date(),			// The time at which this event was triggered
+		data: data			
+	}		
+	
+	self.longPoll.addEventUpdate( event );
+	
+	// Respond to the client so the connection isn't sitting open
+	// We will push data down to the client in long poll, so don't
+	// give them any data here
+	respondToClient();
+}

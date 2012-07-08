@@ -125,11 +125,11 @@ LongPoll.prototype.addEventUpdate = function( event ) {
 // Returns a list of server side event updates since the user requested them
 LongPoll.prototype.getUserUpdates = function( userInfo, requestTime ) {
 
+	var events = new Array();
+	
 	// We're goign to loop through our collection of events backwards
 	// until we find one that is BEFORE the user's request time.
 	// NOTE: eventUpdates[0] represents the oldest event we've got record of
-	var events = new Array();
-	
 	for( var iEvent = this.eventUpdates.length; iEvent > 0; --iEvent ) {
 	
 		// If this event happened before the client requested the data, stop searching events
