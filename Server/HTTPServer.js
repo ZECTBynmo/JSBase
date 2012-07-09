@@ -16,7 +16,13 @@ var createServer = require("http").createServer,
 	url = require("url"),
 	qs = require("querystring"),
 	mime = require("./MimeLookup");
+	
+var DEBUG_LOG = true;
 
+var log = function( text ) {	// A log function we can turn off :/
+	if( !DEBUG_LOG ) return;	
+	console.log( text );
+}
 
 //////////////////////////////////////////////////////////////////////////
 // Constructor
@@ -26,7 +32,7 @@ function Server( port, host ) {
 	
 	// Create a server using the built in Node http module and declare our response to client requests
 	this.server = createServer(function (request, response) {
-		if( typeof(self.requestHandlers) === "undefined" ) { console.log("no request handlers"); return; }
+		if( typeof(self.requestHandlers) === "undefined" ) { log("no request handlers"); return; }
 	
 		// Handle GET requests
 		if( request.method === "GET" ) {
@@ -71,7 +77,7 @@ function Server( port, host ) {
 	
 	// Listen on the port and host we were given
 	this.server.listen( port, host );
-	console.log("Server at http://" + (host || "localhost") + ":" + port.toString() + "/");
+	log("Server at http://" + (host || "localhost") + ":" + port.toString() + "/");
 } // end Server()
 
 
@@ -116,7 +122,7 @@ Server.prototype.createFileHandler = function( filename ) {
 	var body, headers;
 	
 	var content_type = mime.lookupExtension( extname(filename) );
-	console.log( "Creating handler for file: " + filename );
+	log( "Creating handler for file: " + filename );
 	
 	function loadResponseData(response) {
 		// If we've already loaded this file, get out
@@ -128,7 +134,7 @@ Server.prototype.createFileHandler = function( filename ) {
 		// Read the file from disk asynchronously 
 		readFile(filename, function ( error, data ) {
 			if ( error ) {
-				console.log("Error loading " + filename);
+				log("Error loading " + filename);
 			} else {
 				body = data;
 				
@@ -136,7 +142,7 @@ Server.prototype.createFileHandler = function( filename ) {
 							"Content-Length": body.length
 				};
 				
-				console.log( "static file " + filename + " loaded" );
+				log( "static file " + filename + " loaded" );
 				response();	
 			}
 		});
@@ -153,16 +159,45 @@ Server.prototype.createFileHandler = function( filename ) {
 
 //////////////////////////////////////////////////////////////////////////
 // Add a request handler to our map
-Server.prototype.addRequestHandler = function( path, handler ) {
-	console.log( "Adding request handler for " + path );
-	this.requestHandlers[path] = handler;
-}; // end Server.addRequestHandler()
+Server.prototype.addRequestHandler = function( path, handler, shouldOverwrite ) {
+	if( typeof(shouldOverwrite) == "undefined" ) {
+		shouldOverwrite = false;
+	}
+
+	// If we're okay with overwriting any request handler that was sitting in our collection
+	// already, just insert the handler. Otherwise, check whether it already exists
+	if( shouldOverwrite ) {
+		log( "Adding request handler for " + path + " with overwrite" );
+		this.requestHandlers[path] = handler;
+	} else {
+		if( typeof(this.requestHandlers[path]) != "undefined" ) {
+			log( "Failed to add request handler for " + path + ", a handler already exists" );
+		} else {
+			this.requestHandlers[path] = handler;
+		}
+	} 
+	
+}; // end Server.addRequestHandler()	httpServer.addRequestHandler("/jquery-1.7.1.min.js", httpServer.createFileHandler("../../Common/jquery-1.7.1.min.js"));
+
+
+//////////////////////////////////////////////////////////////////////////
+// Adds a handler for a file
+Server.prototype.serveFile = function( clientPath, serverPath ) {
+	log( "Serving " + serverPath + " to clients as " + clientPath );
+	
+	// If the client path doesn't already begin with a slash, append one
+	if( clientPath.indexOf("/") != 0 ) {
+		clientPath = "/" + clientPath;
+	}
+		
+	this.addRequestHandler( clientPath, this.createFileHandler(serverPath) );
+}; // end Server.addGenericHandler()
 
 
 //////////////////////////////////////////////////////////////////////////
 // Add a new generic handler directly to our request handlers
 Server.prototype.addGenericHandler = function( path, callback ) {
-	console.log( "Adding generic request handler for " + path );
+	log( "Adding generic request handler for " + path );
 		
 	this.addRequestHandler( path, this.createGenericHandler(callback) );
 }; // end Server.addGenericHandler()
