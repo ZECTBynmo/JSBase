@@ -32,7 +32,15 @@
 /* ----------------------------------------------------------------------
 													Object Structures
 -------------------------------------------------------------------------
+	var channelRequests = {
+		path: path,
+		clients: new Array( clients )
+	}
 	
+	var client = {
+		userInfo: userInfo,
+		response: responseCallback
+	}
 */
 //////////////////////////////////////////////////////////////////////////
 // Node.js Exports
@@ -47,5 +55,5 @@ var globalNamespace = {};
 //////////////////////////////////////////////////////////////////////////
 // Constructor
 function Channel( server ) {
-	this.requestHandlers = 
+	this.channelRequests = {};
 } // end Channel()
