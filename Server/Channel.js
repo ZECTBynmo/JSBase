@@ -46,14 +46,30 @@
 // Node.js Exports
 var globalNamespace = {};
 (function (exports) {
-	exports.createNewChannel = function( server ) {
-		return new Channel( server );
+	exports.createNewChannel = function( httpServer ) {
+		return new Channel( httpServer );
 	};
 }(typeof exports === 'object' && exports || globalNamespace));
 
 
 //////////////////////////////////////////////////////////////////////////
 // Constructor
-function Channel( server ) {
+function Channel( httpServer ) {
 	this.channelRequests = {};
+	this.httpServer = httpServer;
 } // end Channel()
+
+
+//////////////////////////////////////////////////////////////////////////
+// Adds a request to the channel
+Chat.prototype.addRequestHandler = function( path, handler, shouldOverwrite ) {	
+	if( typeof(shouldOverwrite) == "undefined" ) {
+		shouldOverwrite = false;
+	}
+	
+	// Check whether we have a response for this path for this user already
+	if( !shouldOverwrite ) {
+		
+	}
+	
+} // end addRequestHandler()
