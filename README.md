@@ -5,7 +5,10 @@ JSBase
 
 Server
 * Long Poll			-- Effectively allows the server to push data down to the client
-* HTTPServer			-- Creates a server and allows easy/clean interaction
+* HTTPServer		-- Creates a server and allows easy/clean interaction
+* Chat  	      -- Uses LongPoll and HTTPServer to setup a chat server, sends all required files to client
+* MimeLookup		-- Allows the lookup of mime text strings for common file extensions
+* Channel  		  -- Sets up "rooms" for people to be in and interace with eachother
 
 Client
 * Long Poll			-- Effectively allows the server to push data down to the client
