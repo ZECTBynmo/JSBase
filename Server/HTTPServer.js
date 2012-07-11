@@ -19,7 +19,7 @@
 // POST: more secure - much larger max
 //
 /* ----------------------------------------------------------------------
-													Object Structures
+                                                    Object Structures
 -------------------------------------------------------------------------
 	
 	var request = {
@@ -84,7 +84,7 @@ var log = function( text ) {	// A log function we can turn off :/
 function Server( port, host ) {
 	var self = this;
 	this.requestHandlers = {};			// Our list of responses to http requests
-	//this.eventHandler = eventHandlerImpl.createNewEventHandler();
+	this.eventHandler = eventHandlerImpl.createNewEventHandler();
 	
 	// Create a server using the built in Node http module and declare our response to client requests
 	this.server = createServer(function (request, response) {	
@@ -105,13 +105,13 @@ function Server( port, host ) {
 				response.end( body );
 			};
 			
-			// Call any callbacks that this handler has attached to it
-			if( typeof(handler.callbacks) != "undefined" ) {
-				for( var iCallback=0; iCallback < handler.callbacks.length; ++iCallback ) {
-					
-				}
-			}
+			var path = url.parse(request.url).pathname;
+			var data = qs.parse(url.parse(request.url).query);
+			
+			// Fire the event attached to this path
+			self.eventHandler.fireEvent( path, data );
 
+			// Call our request handler
 			handler(request, response);
 		} else if( request.method === "POST" ) {
 			var fullBody = '';
@@ -133,6 +133,13 @@ function Server( port, host ) {
 					response.end( body );
 				};
 
+				var path = url.parse(request.url).pathname;
+				var data = qs.parse(url.parse(request.url).query);
+				
+				// Fire the event attached to this path
+				this.eventHandler.fireEvent( path, data );
+
+				// Call our request handler
 				handler( request, response, fullBody );
 			});
 		}
@@ -259,6 +266,9 @@ Server.prototype.addRequestHandler = function( path, handler, shouldOverwrite ) 
 			log( "Failed to add request handler for " + path + ", a handler already exists" );
 		} else {
 			this.requestHandlers[path] = handler;
+			
+			// Create an event for this request
+			this.eventHandler.createEvent( path );
 		}
 	}	
 };

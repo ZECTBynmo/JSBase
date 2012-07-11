@@ -1,8 +1,47 @@
 //////////////////////////////////////////////////////////////////////////
+// EventHandler - Server Side
+//////////////////////////////////////////////////////////////////////////
+//
+// This is a generic interface to setup events in a class. 
+//
+// We want to be able to say this:
+// 		someClass.on( "someEventName", function( eventData ) { do something }
+//
+// A class can create an event like this:
+/* 
+//------------------
+	eventHandler.createEvent( "myEventName" );
+// ------------------
+*/
+// A class can set up the on("some event") functionality like this:
+/* 
+// ------------------
+	someClass.prototype.on = function( eventName, callback ) {
+		eventList.addEventCallback( eventName, callback );
+	}
+// ------------------
+*/
+// To trigger an event, you can call "fireEvent"
+//
+/* ----------------------------------------------------------------------
+                                                    Object Structures
+-------------------------------------------------------------------------
+	var event = {
+		callbackList: some array of callbacks,
+	}
+	
+	var callback = {
+		callback: some function,
+		callbackScope: optional scope argument, allows you to pass some 
+		               arbitrary scope into the function and get it back 
+					   when an event occurs
+	}
+*/
+//////////////////////////////////////////////////////////////////////////
 // Node.js Exports
 var globalNamespace = {};
 (function (exports) {
-	exports.getNewEventHandler = function() {
+	exports.createNewEventHandler = function() {
 		newEventHandler= new EventHandler();
 		return newEventHandler;
 	};
@@ -11,9 +50,10 @@ var globalNamespace = {};
 
 //////////////////////////////////////////////////////////////////////////
 // Namespace (lol)
-var sys = require("sys"),
-	util = require("./util");
-	
+	var DEBUG = true;
+	var log = function( text ) {
+		if( DEBUG ) console.log( text ) ;
+	}
 
 //////////////////////////////////////////////////////////////////////////
 // Constructor
@@ -31,7 +71,7 @@ EventHandler.prototype.createEvent = function( eventName ) {
 
 	this.eventList[eventName] = newEvent;
 	
-	util.serverConsole( sys, "Event created: " + eventName );
+	log( "Event created: " + eventName );
 }; // end createEvent()
 
 
@@ -55,7 +95,7 @@ EventHandler.prototype.addEventCallback = function( eventName, callback, callbac
 	if( this.eventList[eventName] ) {
 		this.eventList[eventName].callbackList.push( newCallback );
 	} else {
-		util.serverConsole( sys, "Someone tried to sign up for an even that didnt exist: " + eventName );
+		log( "Someone tried to sign up for an even that didnt exist: " + eventName );
 	}
 }; // end EventHandler.addEventCallback()
 
@@ -63,10 +103,10 @@ EventHandler.prototype.addEventCallback = function( eventName, callback, callbac
 //////////////////////////////////////////////////////////////////////////
 // Call all callback functions attached to an event
 EventHandler.prototype.fireEvent = function( eventName, data ) {
-	util.serverConsole( sys, "Event fired: " + eventName + " with " + this.eventList[eventName].callbackList.length + " callbacks" );
+	log( "Event fired: " + eventName + " with " + this.eventList[eventName].callbackList.length + " callbacks" );
 
 	for( iCallback=0; iCallback<this.eventList[eventName].callbackList.length; ++iCallback ) {
-		if( !util.exists(this.eventList[eventName].callbackList[iCallback].callbackScope) ) {
+		if( typeof(this.eventList[eventName].callbackList[iCallback].callbackScope) == "undefined" ) {
 			this.eventList[eventName].callbackList[iCallback].callback( data );
 		} else {
 			this.eventList[eventName].callbackList[iCallback].callback( this.eventList[eventName].callbackList[iCallback].callbackScope, data );
