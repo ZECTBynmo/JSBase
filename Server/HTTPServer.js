@@ -70,9 +70,10 @@ var createServer = require("http").createServer,
 	readFile = require("fs").readFile,
 	url = require("url"),
 	qs = require("querystring"),
-	mime = require("./MimeLookup");
+	mime = require("./Common/MimeLookup"),
+	eventHandlerImpl = require("./Common/EventHandler");
 	
-var DEBUG_LOG = true;
+var DEBUG_LOG = false;
 
 var log = function( text ) {	// A log function we can turn off :/
 	if( DEBUG_LOG ) { console.log( text ); }
@@ -83,6 +84,7 @@ var log = function( text ) {	// A log function we can turn off :/
 function Server( port, host ) {
 	var self = this;
 	this.requestHandlers = {};			// Our list of responses to http requests
+	//this.eventHandler = eventHandlerImpl.createNewEventHandler();
 	
 	// Create a server using the built in Node http module and declare our response to client requests
 	this.server = createServer(function (request, response) {	
@@ -238,6 +240,7 @@ Server.prototype.addRequestCallback = function( path, callback ) {
 		this.requestHandlers[path].callbacks.push( callback );
 	}
 } // end addRequestCallback()
+
 
 //////////////////////////////////////////////////////////////////////////
 // Add a request handler to our map

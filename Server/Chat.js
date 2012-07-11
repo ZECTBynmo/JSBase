@@ -51,10 +51,10 @@ function Chat( httpServer, longPoll, moduleName, newChatString ) {
 	console.log( "Chat name is: " + newChatString );
 	
 	// Handle user requests for our UI objects
-	httpServer.serveFile("/jquery-1.7.1.min.js", "../../Common/jquery-1.7.1.min.js" );
-	httpServer.serveFile("/jquery.ui.chatbox.js", "../../Common/jquery.ui.chatbox.js" );
-	httpServer.serveFile("/jquery.ui.chatbox.css", "../../Common/jquery.ui.chatbox.css" );
-	httpServer.serveFile("/jquery-ui-1.8.21.custom.min.js", "../../Common/jquery-ui-1.8.21.custom.min.js" );
+	httpServer.serveFile("/jquery-1.7.1.min.js", "../../Client/Common/jquery-1.7.1.min.js" );
+	httpServer.serveFile("/jquery.ui.chatbox.js", "../../Client/Common/jquery.ui.chatbox.js" );
+	httpServer.serveFile("/jquery.ui.chatbox.css", "../../Client/Common/jquery.ui.chatbox.css" );
+	httpServer.serveFile("/jquery-ui-1.8.21.custom.min.js", "../../Client/Common/jquery-ui-1.8.21.custom.min.js" );
 	
 	// Handle user requests for needed scripts
 	httpServer.serveFile("/LongPoll.js", "../../Client/LongPoll.js" );
