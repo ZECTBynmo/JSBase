@@ -8,4 +8,5 @@ var server = httpServerImpl.createNewServer( 1111, null ),
 	chat = chatImpl.createNewChat( server, longPoll );
 	
 // Send HTML to client
+server.serveFile( "/", "index.html" );
 server.addRequestHandler("/", server.createFileHandler("index.html"));
