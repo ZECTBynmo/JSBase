@@ -2,14 +2,12 @@
 // Node.js Exports
 var MimeLookup = exports;
 
-MimeLookup = {
-  // returns MIME type for extension, or fallback, or octet-steam
-  lookupExtension : function(ext, fallback) {
-		return fu.mime.TYPES[ext.toLowerCase()] || fallback || 'application/octet-stream';
-  },
+// returns MIME type for extension, or fallback, or octet-steam
+MimeLookup.lookupExtension = function( ext, fallback ) {
 
-  // List of most common mime-types,
-  TYPES : { ".3gp"   : "video/3gpp"
+	// List of most common mime-types,
+	var types =  { 
+			".3gp"   : "video/3gpp"
           , ".a"     : "application/octet-stream"
           , ".ai"    : "application/postscript"
           , ".aif"   : "audio/x-aiff"
@@ -175,4 +173,6 @@ MimeLookup = {
           , ".yml"   : "text/yaml"
           , ".zip"   : "application/zip"
           }
+		  
+	return types[ext.toLowerCase()] || fallback || 'application/octet-stream';
 };
