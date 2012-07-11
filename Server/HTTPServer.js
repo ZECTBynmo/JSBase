@@ -1,4 +1,59 @@
 //////////////////////////////////////////////////////////////////////////
+// HTTPServer - Server Side
+//////////////////////////////////////////////////////////////////////////
+//
+// This handles all http traffic between server and client. Any direct
+// GET/POST/etc... handling should be put here.
+//
+// Disclaimer: I have no idea what I'm talking about, but this is my working 
+// knowledge of how this stuff works - MV
+//
+// HTTP Requests come in as a request and response pair. The request holds
+// the url path that the user is requesting (eg. "/index.html"). The response is
+// a callback that we'll eventally call to return a success/fail value to the
+// client that sent it. We can also attach data to the response before we send
+// it back.
+// 
+// Request types
+// GET: insecure - 1024 max characters in some browsers (can press back and have it work)
+// POST: more secure - much larger max
+//
+/* ----------------------------------------------------------------------
+													Object Structures
+-------------------------------------------------------------------------
+	
+	var request = {
+		method: method,
+		url: url,
+		headers: headers,
+		trailers: trailers,
+		httpVersion: httpVersion,
+		setEncoding: setEncoding([encoding]),
+		pause: pause(),
+		resume: resumt(),
+		connection: connection
+		
+		// has event 'data'
+		// has event 'end'
+		// has event 'close'		
+	}
+
+	var response = {
+		writeContinue: writeContinue(),	
+	    writeHead: writeHead( statusCode, [reasonPhrase], [headers] ),
+		statusCode: statusCode,
+		setHeader: setHeader( name, value ),
+		sendDate: sendDate,
+		getHeader: getHeader( name ),
+		removeHeader: removeHeader( name ),
+		write: write( chunk, [encoding] ),
+		addTrailers: addTrailers( headers ),
+		response.end( [data], [encoding] )		
+		
+		// has event 'close'		
+	}
+*/
+//////////////////////////////////////////////////////////////////////////
 // Node.js Exports
 var globalNamespace = {};
 (function (exports) {
@@ -20,8 +75,7 @@ var createServer = require("http").createServer,
 var DEBUG_LOG = true;
 
 var log = function( text ) {	// A log function we can turn off :/
-	if( !DEBUG_LOG ) return;	
-	console.log( text );
+	if( DEBUG_LOG ) { console.log( text ); }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -31,7 +85,7 @@ function Server( port, host ) {
 	this.requestHandlers = {};			// Our list of responses to http requests
 	
 	// Create a server using the built in Node http module and declare our response to client requests
-	this.server = createServer(function (request, response) {
+	this.server = createServer(function (request, response) {	
 		if( typeof(self.requestHandlers) === "undefined" ) { log("no request handlers"); return; }
 	
 		// Handle GET requests
@@ -48,6 +102,13 @@ function Server( port, host ) {
 				});
 				response.end( body );
 			};
+			
+			// Call any callbacks that this handler has attached to it
+			if( typeof(handler.callbacks) != "undefined" ) {
+				for( var iCallback=0; iCallback < handler.callbacks.length; ++iCallback ) {
+					
+				}
+			}
 
 			handler(request, response);
 		} else if( request.method === "POST" ) {
@@ -90,6 +151,8 @@ Server.prototype.createGenericHandler = function( callback, isDataExpected ) {
 	
 	// Create our handler
 	var handler = function(request, response) {		
+		var hasResponded = false;
+	
 		// Create a function that will send some data to the client.
 		// If we don't want to respond right away, we can store this function
 		// and it will stay valid until we need it, with all the relevant info
@@ -99,17 +162,24 @@ Server.prototype.createGenericHandler = function( callback, isDataExpected ) {
 				response.respondJSON( 200, responseData );
 			} catch( error ) {
 				if( isDataExpected )
-					response.respondJSON(400, {error: "Response data expected but undefined"});
+					response.respondJSON( 400, {error: "Response data expected but undefined"} );
 				else
 					response.respondJSON( 200, {} );
 			}
+			hasResponded = true;
 		}
 	
 		// Grab our request data if there is any
 		var data = qs.parse(url.parse(request.url).query);
 	
 		// Give that function to the module/code using the generic handler
-		callback( respondToClient, data );
+		var responseData = callback( respondToClient, data );
+		
+		// If we haven't responded to the client already, and we returned
+		// data out of our callback, send the returned data to the client
+		if( !hasResponded && typeof(responseData) != "undefined" ) {
+			respondToClient( responseData );
+		}
 	} // end handler()
 	
 	return handler;
@@ -158,6 +228,18 @@ Server.prototype.createFileHandler = function( filename ) {
 
 
 //////////////////////////////////////////////////////////////////////////
+// Create a response handler for a static file
+Server.prototype.addRequestCallback = function( path, callback ) {
+	if( typeof(this.requestHandlers[path]) != "undefined" ) {
+		// Setup the array if it's undefined
+		if( typeof(this.requestHandlers[path].callbacks) == "undefined" )
+			this.requestHandlers[path].callbacks = new Array();
+			
+		this.requestHandlers[path].callbacks.push( callback );
+	}
+} // end addRequestCallback()
+
+//////////////////////////////////////////////////////////////////////////
 // Add a request handler to our map
 Server.prototype.addRequestHandler = function( path, handler, shouldOverwrite ) {
 	if( typeof(shouldOverwrite) == "undefined" ) {
@@ -175,9 +257,8 @@ Server.prototype.addRequestHandler = function( path, handler, shouldOverwrite ) 
 		} else {
 			this.requestHandlers[path] = handler;
 		}
-	} 
-	
-}; // end Server.addRequestHandler()	httpServer.addRequestHandler("/jquery-1.7.1.min.js", httpServer.createFileHandler("../../Common/jquery-1.7.1.min.js"));
+	}	
+};
 
 
 //////////////////////////////////////////////////////////////////////////
