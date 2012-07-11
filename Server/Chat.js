@@ -56,6 +56,9 @@ function Chat( httpServer, longPoll, moduleName, newChatString ) {
 	httpServer.serveFile("/jquery.ui.chatbox.css", "../../Common/jquery.ui.chatbox.css" );
 	httpServer.serveFile("/jquery-ui-1.8.21.custom.min.js", "../../Common/jquery-ui-1.8.21.custom.min.js" );
 	
+	// Handle user requests for needed scripts
+	httpServer.serveFile("/LongPoll.js", "../../Client/LongPoll.js" );
+	
 	// Create a generic request handler to grab new chat data (text, etc)
 	httpServer.addGenericHandler( "/" + newChatString, this.createOnChat() );
 } // end Chat()
@@ -63,8 +66,8 @@ function Chat( httpServer, longPoll, moduleName, newChatString ) {
 
 //////////////////////////////////////////////////////////////////////////
 // Returns a function to handle incoming chat events
-// We want to return a function, rather than BEING the function, because
-// it allows us to pass our this pointer into closure
+// We want to return a function here, rather than BEING the function, because
+// it allows us to pass our this pointer into closure as self
 Chat.prototype.createOnChat = function( respondToClient, data ) {	
 	var self = this;
 	
