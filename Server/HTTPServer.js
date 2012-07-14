@@ -82,9 +82,11 @@ var log = function( text ) {	// A log function we can turn off :/
 //////////////////////////////////////////////////////////////////////////
 // Constructor
 function Server( port, host ) {
-	var self = this;
+	this.name = "HTTPServer";
 	this.requestHandlers = {};			// Our list of responses to http requests
-	this.eventHandler = eventHandlerImpl.createNewEventHandler();
+	this.eventHandler = eventHandlerImpl.createNewEventHandler( this.name );
+	
+	var self = this;
 	
 	// Create a server using the built in Node http module and declare our response to client requests
 	this.server = createServer(function (request, response) {	
@@ -109,7 +111,7 @@ function Server( port, host ) {
 			var data = qs.parse(url.parse(request.url).query);
 			
 			// Fire the event attached to this path
-			selff.eventHandler.fireEvent( path, data );
+			self.eventHandler.fireEvent( path, data );
 
 			// Call our request handler
 			handler(request, response);
@@ -155,6 +157,9 @@ function Server( port, host ) {
 // Create a handler that responds by calling the callback function its given
 // and sending the data that it returns to the client
 Server.prototype.createGenericHandler = function( callback, isDataExpected ) {
+	if( typeof(callback) == "undefined" )
+		log( "Didn't get a callback for the generic handler" );
+
 	if( typeof(isDataExpected) === "undefined" )
 		isDataExpected = false;
 	
@@ -183,11 +188,16 @@ Server.prototype.createGenericHandler = function( callback, isDataExpected ) {
 	
 		// Give that function to the module/code using the generic handler
 		var responseData;
-		if( typeof(callback) != "undefined" )
+		if( typeof(callback) != "undefined" ) {
 			responseData = callback( respondToClient, data );
+		} else { log("callback is undefined" ); }
 		
 		// If we haven't responded to the client already, and we returned
 		// data out of our callback, send the returned data to the client
+		//
+		// Note: if we allow this to respond to the client when responseData,
+		// is undefined, it will cause longpoll to not be able to store callbacks, 
+		// meaning it'll respond constantly, eating up server resources.
 		if( !hasResponded && typeof(responseData) != "undefined" ) {
 			respondToClient( responseData );
 		}
@@ -241,6 +251,8 @@ Server.prototype.createFileHandler = function( filename ) {
 //////////////////////////////////////////////////////////////////////////
 // Adds a callback to an HTTP event
 Server.prototype.on = function( eventPath, callback ) {
+	log( "Adding callback for " + eventPath );
+	
 	// If the event name doesn't already begin with a /, put one on
 	if( eventPath.indexOf("/") != 0 ) {
 		eventPath = "/" + eventPath;
@@ -250,7 +262,7 @@ Server.prototype.on = function( eventPath, callback ) {
 	// handler for it, so the client will get something back if they make a
 	// request with that path
 	if( typeof(this.requestHandlers[eventPath]) == "undefined" ) {
-		this.addRequestHandler( eventPath, this.createGenericHandler() );
+		this.addRequestHandler( eventPath, this.createGenericHandler(callback) );
 	}
 } // end on()
 
