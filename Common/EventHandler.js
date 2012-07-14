@@ -62,6 +62,12 @@ EventHandler.prototype.addEventCallback = function( eventName, callback, callbac
 //////////////////////////////////////////////////////////////////////////
 // Call all callback functions attached to an event
 EventHandler.prototype.fireEvent = function( eventName, data ) {
+	// Just return if we don't have this event yet
+	if( typeof(this.eventList[eventName] == "undefined" ) {
+		console.log( "Tried to fire an event that didn't exist: " + eventName );
+		return;
+	}
+
 	// Call all of our callbacks
 	for( iCallback=0; iCallback<this.eventList[eventName].callbackList.length; ++iCallback ) {
 		if( typeof(this.eventList[eventName].callbackList[iCallback].callbackScope) == "undefined" ) {
