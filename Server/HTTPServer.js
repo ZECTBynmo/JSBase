@@ -109,7 +109,7 @@ function Server( port, host ) {
 			var data = qs.parse(url.parse(request.url).query);
 			
 			// Fire the event attached to this path
-			self.eventHandler.fireEvent( path, data );
+			selff.eventHandler.fireEvent( path, data );
 
 			// Call our request handler
 			handler(request, response);
@@ -182,7 +182,9 @@ Server.prototype.createGenericHandler = function( callback, isDataExpected ) {
 		var data = qs.parse(url.parse(request.url).query);
 	
 		// Give that function to the module/code using the generic handler
-		var responseData = callback( respondToClient, data );
+		var responseData;
+		if( typeof(callback) != "undefined" )
+			responseData = callback( respondToClient, data );
 		
 		// If we haven't responded to the client already, and we returned
 		// data out of our callback, send the returned data to the client
@@ -234,6 +236,23 @@ Server.prototype.createFileHandler = function( filename ) {
 		});
 	}
 } // end Server.createFileHandler()
+
+
+//////////////////////////////////////////////////////////////////////////
+// Adds a callback to an HTTP event
+Server.prototype.on = function( eventPath, callback ) {
+	// If the event name doesn't already begin with a /, put one on
+	if( eventPath.indexOf("/") != 0 ) {
+		eventPath = "/" + eventPath;
+	}
+	
+	// If this is the first time we've heard of this event, make a generic
+	// handler for it, so the client will get something back if they make a
+	// request with that path
+	if( typeof(this.requestHandlers[eventPath]) == "undefined" ) {
+		this.addRequestHandler( eventPath, this.createGenericHandler() );
+	}
+} // end on()
 
 
 //////////////////////////////////////////////////////////////////////////
