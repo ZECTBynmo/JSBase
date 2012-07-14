@@ -8,41 +8,41 @@
 // 		someClass.on( "someEventName", function( eventData ) { do something }
 //
 // A class can create an event like this:
-/* 
-//------------------
+/*
 	eventHandler.createEvent( "myEventName" );
-// ------------------
 */
 // A class can set up the on("some event") functionality like this:
-/* 
-// ------------------
+/*
 	someClass.prototype.on = function( eventName, callback ) {
-		eventList.addEventCallback( eventName, callback );
+		eventHandler.addEventCallback( eventName, callback );
 	}
-// ------------------
 */
-// To trigger an event, you can call "fireEvent"
+// To trigger an event, you can call "fireEvent( eventName )"
 //
+// Give the event handler a name if you want to have legible debug statements.
+// This is a big help, because debugging can be difficult when events have
+// a complicated structure.
 /* ----------------------------------------------------------------------
                                                     Object Structures
 -------------------------------------------------------------------------
 	var event = {
-		callbackList: some array of callbacks,
+		name: some name,
+		callbackList: some array of callbacks
 	}
 	
 	var callback = {
 		callback: some function,
 		callbackScope: optional scope argument, allows you to pass some 
-		               arbitrary scope into the function and get it back 
-					   when an event occurs
+		               arbitrary scope in while setting up the callback,
+					   and get it back when an event occurs
 	}
 */
 //////////////////////////////////////////////////////////////////////////
 // Node.js Exports
 var globalNamespace = {};
 (function (exports) {
-	exports.createNewEventHandler = function() {
-		newEventHandler= new EventHandler();
+	exports.createNewEventHandler = function( name ) {
+		newEventHandler= new EventHandler( name );
 		return newEventHandler;
 	};
 }(typeof exports === 'object' && exports || globalNamespace));
@@ -50,14 +50,15 @@ var globalNamespace = {};
 
 //////////////////////////////////////////////////////////////////////////
 // Namespace (lol)
-	var DEBUG = true;
-	var log = function( text ) {
-		if( DEBUG ) console.log( text ) ;
-	}
+var DEBUG = false;
+var log = function( text ) {
+	if( DEBUG ) console.log( text ) ;
+}
 
 //////////////////////////////////////////////////////////////////////////
 // Constructor
-function EventHandler() {
+function EventHandler( name ) {
+	this.name = name;
 	this.eventList = {};
 } // end EventHandler()
 
@@ -71,7 +72,7 @@ EventHandler.prototype.createEvent = function( eventName ) {
 
 	this.eventList[eventName] = newEvent;
 	
-	log( "Event created: " + eventName );
+	log( this.name + " event created: " + eventName );
 }; // end createEvent()
 
 
@@ -85,6 +86,7 @@ EventHandler.prototype.deleteEvent = function( eventName ) {
 //////////////////////////////////////////////////////////////////////////
 // Adds a callback to an event's list
 EventHandler.prototype.addEventCallback = function( eventName, callback, callbackScope ) {
+
 	// Create our new callback
 	newCallback = {
 		callback: callback,
@@ -93,6 +95,7 @@ EventHandler.prototype.addEventCallback = function( eventName, callback, callbac
 
 	// Push the new callback into the event callback list
 	if( this.eventList[eventName] ) {
+		log( "Adding callback for " + eventName );
 		this.eventList[eventName].callbackList.push( newCallback );
 	} else {
 		log( "Someone tried to sign up for an even that didnt exist: " + eventName );
@@ -103,7 +106,13 @@ EventHandler.prototype.addEventCallback = function( eventName, callback, callbac
 //////////////////////////////////////////////////////////////////////////
 // Call all callback functions attached to an event
 EventHandler.prototype.fireEvent = function( eventName, data ) {
-	log( "Event fired: " + eventName + " with " + this.eventList[eventName].callbackList.length + " callbacks" );
+	// Just return if we don't have this event yet
+	if( typeof(this.eventList[eventName]) == "undefined" ) {
+		log( "Tried to fire a " + this.name + " event that didn't exist: " + eventName );
+		return;
+	}
+	
+	log( this.name + " event fired: " + eventName + " with " + this.eventList[eventName].callbackList.length + " callbacks" );
 
 	for( iCallback=0; iCallback<this.eventList[eventName].callbackList.length; ++iCallback ) {
 		if( typeof(this.eventList[eventName].callbackList[iCallback].callbackScope) == "undefined" ) {
