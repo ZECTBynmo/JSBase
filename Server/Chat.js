@@ -27,7 +27,7 @@ var globalNamespace = {};
 // Namespace (lol)
 var log = function( a ) { console.log(a); };
 var exists = function(a) { return typeof(a) === "undefined"; };		// Check whether a variable exists
-var deflt = function(a, b) { 										// Default a to b if it's undefined
+var deflt = function(a, b) { 										// Default a to b if a is undefined
 	if( typeof(a) === "undefined" ){ 
 		return b; 
 	} else return a; 
@@ -36,14 +36,14 @@ var deflt = function(a, b) { 										// Default a to b if it's undefined
 
 //////////////////////////////////////////////////////////////////////////
 // Constructor
-function Chat( httpServer, longPoll, moduleName, newChatString ) {
+function Chat( httpServer, longPoll, newChatString ) {
+	this.name = "Chat";
+
 	// Default arguments
-	moduleName = deflt( moduleName, "Chat" );
 	newChatString = deflt( newChatString, "newChat" );
 
 	this.httpServer = httpServer;			// Our HTTP server
-	this.longPoll = longPoll;				// Our long poll
-	this.moduleName = moduleName;			// Our module name					
+	this.longPoll = longPoll;				// Our long poll				
 	this.newChatString = newChatString;		// The string we expect for a new chat	
 	
 	// Receive new chat events
