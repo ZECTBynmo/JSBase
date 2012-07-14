@@ -60,7 +60,8 @@ function Chat( httpServer, longPoll, moduleName, newChatString ) {
 	httpServer.serveFile("/LongPoll.js", "../../Client/LongPoll.js" );
 	
 	// Create a generic request handler to grab new chat data (text, etc)
-	httpServer.addGenericHandler( "/" + newChatString, this.createOnChat() );
+	httpServer.on( "/" + newChatString, this.createOnChat() );
+	//httpServer.addGenericHandler( "/" + newChatString, this.createOnChat() );
 } // end Chat()
 
 
