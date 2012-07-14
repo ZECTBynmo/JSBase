@@ -55,6 +55,7 @@ var globalNamespace = {};
 //////////////////////////////////////////////////////////////////////////
 // Constructor
 function Channel( httpServer ) {
+	this.name = "Channel";
 	this.channelRequests = {};
 	this.httpServer = httpServer;
 } // end Channel()
