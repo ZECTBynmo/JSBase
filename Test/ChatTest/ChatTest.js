@@ -5,7 +5,7 @@ var httpServerImpl = require("../../Server/HTTPServer"),
 // Create our server and 
 var server = httpServerImpl.createNewServer( 1111, null ),
 	longPoll = longPollImpl.createNewLongPoll( server ),
-	chat = chatImpl.createNewChat( server, longPoll );
+	chat = chatImpl.createNewChat( server, server, longPoll );
 	
 // Send HTML to client
 server.serveFile( "/", "index.html" );

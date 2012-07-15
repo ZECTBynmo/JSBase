@@ -36,7 +36,7 @@ var deflt = function(a, b) { 										// Default a to b if a is undefined
 
 //////////////////////////////////////////////////////////////////////////
 // Constructor
-function Chat( httpServer, longPoll, newChatString ) {
+function Chat( httpServer, channel, longPoll, newChatString ) {
 	this.name = "Chat";
 
 	// Default arguments
@@ -60,8 +60,7 @@ function Chat( httpServer, longPoll, newChatString ) {
 	httpServer.serveFile("/LongPoll.js", "../../Client/LongPoll.js" );
 	
 	// Create a generic request handler to grab new chat data (text, etc)
-	httpServer.on( "/" + newChatString, this.createOnChat() );
-	//httpServer.addGenericHandler( "/" + newChatString, this.createOnChat() );
+	channel.on( "/" + newChatString, this.createOnChat() );
 } // end Chat()
 
 
