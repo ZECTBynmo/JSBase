@@ -63,7 +63,7 @@ LongPoll.prototype.eventLoop = function( eventData ) {
 	}
 	
 	if( typeof(eventData) != "undefined" ) {
-		for( var iEvent in eventData ){
+		for( var iEvent in eventData ) {
 			// Loop through our eventCallbacks and see if we need to respond to this event
 			// Note: we have to loop through all of them, because more than one may be a response
 			// to this event
@@ -71,7 +71,7 @@ LongPoll.prototype.eventLoop = function( eventData ) {
 				var callback = self.eventCallbacks[iCallback];
 			
 				// If we find a callback that's listening for this event, call the callback
-				if( callback.eventName === eventData[iEvent].name ) {
+				if( callback.eventName == eventData[iEvent].name ) {
 					callback.callback( eventData[iEvent].data );
 				}
 			} // end for each callback
