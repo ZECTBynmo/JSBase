@@ -50,7 +50,7 @@ var globalNamespace = {};
 // Namespace (lol)
 var eventHandlerImpl = require("./Common/EventHandler");
 	
-var DEBUG_LOG = false;
+var DEBUG_LOG = true;
 
 var log = function( text ) {	// A log function we can turn off :/
 	if( DEBUG_LOG ) { console.log( text ); }
@@ -65,14 +65,14 @@ function Channel( parentServer ) {
 	this.parentServer = parentServer;
 	this.eventHandler = eventHandlerImpl.createNewEventHandler( this.name );
 
-	console.log( "pooop" );
+	log( "Creating channel " + this.name );
 } // end Channel()
 
 
 //////////////////////////////////////////////////////////////////////////
 // Adds a callback to some event
 Channel.prototype.on = function( eventName, callback ) {	
-	log( "Adding callback for " + eventName );
+	log( "Channel: Adding callback for " + eventName )
 	
 	// If the event name doesn't already begin with a /, put one on
 	if( eventName.indexOf("/") != 0 ) {
@@ -82,7 +82,7 @@ Channel.prototype.on = function( eventName, callback ) {
 	// Create our struct of event traits
 	eventTraits = {
 		callback: callback,
-		callbackIfNew: this.onNewEvent,
+		callbackIfNew: this.getOnNew(eventName),
 		shouldCreateEvent: true
 	}
 	
@@ -94,16 +94,38 @@ Channel.prototype.on = function( eventName, callback ) {
 //////////////////////////////////////////////////////////////////////////
 // We want to add each event to our parent server the first time we get it
 // (and only the first)
-Channel.prototype.onNewEvent = function( eventName ) {	
-	this.parentServer.on( eventName, this.onEventFired );
-} // end onNewEvent()
+Channel.prototype.getOnNew = function( eventName ) {
+	console.log( "New event: " + eventName );
+	
+	// Put our this pointer in closure
+	var self = this;
+	
+	var onNew = function( name ) {
+		log( "Got event " + name + " for the first time" );
+		
+		// Append our channel name into the event string, so it can be unique
+		eventName = "/" + self.name + eventName;
+		self.parentServer.on( eventName, self.getOnEventFired( eventName ) );
+	}
+	
+	return onNew;
+} // end getOnNew()
 
 
 //////////////////////////////////////////////////////////////////////////
 // Fire the event in our event handler, so we call all of the callbacks attached to the event
-Channel.prototype.onEventFired = function( eventName, traits ) {	
-	// Subtract our prefix
-	eventName = eventName.subString(("/" +this.name).length-1);
+Channel.prototype.getOnEventFired = function( eventName ) {	
+	var self = this;
+	var eventName = eventName;
+	
+	var onEventFired = function( respond, data ) {	
+		console.log( eventName );
+	
+		// Subtract our prefix
+		eventName = eventName.substring(("/" + self.name).length);
 
-	this.eventHandler.fireEvent( eventData.eventName );
-}
+		self.eventHandler.fireEvent( eventName, data );
+	}
+	
+	return onEventFired;
+} // end getOnEventFired()
