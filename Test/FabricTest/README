@@ -1,0 +1,5 @@
+This is a test of fabric.js, a third party SVG/vector graphics library.
+https://github.com/kangax/fabric.js
+
+NPM requirements:
+1) jsdom (in JSBase/Server/Animation/)
