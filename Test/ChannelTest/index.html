@@ -50,10 +50,7 @@
 		
 			function displayResults( result ) {
 				$('#resultList').empty();
-				
-				// Show the name of the result's event
-				$("#resultList").append('<li>' + iData + ": " + result.name +'</li><br />');
-
+			
 				for( var iData in result ) {
 					$("#resultList").append('<li>' + iData + ": " + result[iData] +'</li><br />');
 				}
