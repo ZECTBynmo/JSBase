@@ -48,17 +48,17 @@
 				longPoll.eventLoop();				
 			});
 		
-			function displayResults( results ) {
+			function displayResults( result ) {
 				$('#resultList').empty();
 				
 				// Show the name of the result's event
-				$("#resultList").append('<li>' + iData + ": " + results.name +'</li><br />');
+				$("#resultList").append('<li>' + iData + ": " + result.name +'</li><br />');
 
-				for( var iData in results.data ) {
-					$("#resultList").append('<li>' + iData + ": " + results.data[iData] +'</li><br />');
+				for( var iData in result ) {
+					$("#resultList").append('<li>' + iData + ": " + result[iData] +'</li><br />');
 				}
 				
-				$("#chat_div").chatbox("option", "boxManager").addMsg(results.data["userInfo[name]"], results.data.text);
+				$("#chat_div").chatbox("option", "boxManager").addMsg(result["userInfo[name]"], result.text);
 			} // end displayResults()
 			
 			function sendChat( text, userInfo ) {
