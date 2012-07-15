@@ -67,7 +67,7 @@ function LongPoll( httpServer ) {
 	// Add our long poll request handler to the server
 	var self = this;
 	httpServer.addRequestHandler( "/longPollRequest", httpServer.createGenericHandler(function( respondToClient, data ) {
-		log( "Got LongPoll request" );
+		log( "Got LongPoll request from " + data.userInfo );
 		
 		var userInfo = data.userInfo;
 		var requestTime = data.requestTime;
