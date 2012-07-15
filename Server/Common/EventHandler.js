@@ -134,6 +134,7 @@ EventHandler.prototype.fireEvent = function( eventName, data ) {
 	// Just return if we don't have this event yet
 	if( typeof(this.eventList[eventName]) == "undefined" ) {
 		log( "Tried to fire a " + this.name + " event that didn't exist: " + eventName );
+		log( "It had data: " + require("util").inspect(data) );
 		return;
 	}
 	
