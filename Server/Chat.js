@@ -68,10 +68,12 @@ function Chat( httpServer, channel, longPoll, newChatString ) {
 // Returns a function to handle incoming chat events
 // We want to return a function here, rather than BEING the function, because
 // it allows us to pass our this pointer into closure as self
-Chat.prototype.createOnChat = function( respondToClient, data ) {	
+Chat.prototype.createOnChat = function( respondToClient, data ) {
 	var self = this;
 	
-	var onChat = function( respondToClient, data ) {
+	var onChat = function( data ) {
+		console.log( data );
+	
 		// Create a new event to report to LongPoll
 		var event = {
 			name: self.newChatString, 	// The name of this event (must be unique)
@@ -81,11 +83,6 @@ Chat.prototype.createOnChat = function( respondToClient, data ) {
 		}		
 		
 		self.longPoll.addEventUpdate( event );
-		
-		// Respond to the client so the connection isn't sitting open
-		// We will push data down to the client in long poll, so don't
-		// give them any data here
-		respondToClient();
 	}
 	
 	return onChat;
