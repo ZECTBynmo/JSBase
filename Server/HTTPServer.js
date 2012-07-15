@@ -253,7 +253,7 @@ Server.prototype.createFileHandler = function( filename ) {
 //////////////////////////////////////////////////////////////////////////
 // Adds a callback to an HTTP event
 Server.prototype.on = function( eventPath, callback, listenerName ) {
-	log( "Adding callback for " + eventPath );
+	log( "HTTPServer: Adding callback for " + eventPath );
 	
 	if( typeof(listenerName) == "undefined" ) { 
 		listenerName = ""; 
@@ -265,6 +265,8 @@ Server.prototype.on = function( eventPath, callback, listenerName ) {
 	if( eventPath.indexOf("/") != 0 ) {
 		eventPath = "/" + listenerName + eventPath;
 	}
+	
+	this.eventHandler.addEventCallback( eventPath, callback );
 	
 	// If this is the first time we've heard of this event, make a generic
 	// handler for it, so the client will get something back if they make a
