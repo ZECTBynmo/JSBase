@@ -102,5 +102,8 @@ Channel.prototype.onNewEvent = function( eventName ) {
 //////////////////////////////////////////////////////////////////////////
 // Fire the event in our event handler, so we call all of the callbacks attached to the event
 Channel.prototype.onEventFired = function( eventName, traits ) {	
+	// Subtract our prefix
+	eventName = eventName.subString(("/" +this.name).length-1);
+
 	this.eventHandler.fireEvent( eventData.eventName );
 }

@@ -62,12 +62,15 @@
 			} // end displayResults()
 			
 			function sendChat( text, userInfo ) {
+			
 				var newChat = {
+					channel: "/Channel",
 					text: text,
 					userInfo: userInfo,
 					time: new Date()
 				}
-				jQuery.get("/newChat", newChat, function (data, status) {
+				
+				jQuery.get("/Channel/newChat", newChat, function (data, status) {
 					if (status != "success") return;
 					//displayResults( data );
 				}, "json");

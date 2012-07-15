@@ -51,6 +51,7 @@ var globalNamespace = {};
 // Namespace (lol)
 var createServer = require("http").createServer;
 var readFile = require("fs").readFile;
+var util = require('util')
 var url = require("url");
 var exists = function( someItem ) { return typeof(someItem) === "undefined"; }
 var REQUEST_LIFETIME_MS = 30000;
@@ -67,7 +68,7 @@ function LongPoll( httpServer ) {
 	// Add our long poll request handler to the server
 	var self = this;
 	httpServer.addRequestHandler( "/longPollRequest", httpServer.createGenericHandler(function( respondToClient, data ) {
-		log( "Got LongPoll request from " + data.userInfo );
+		log( "Got LongPoll request from " + util.inspect(data) );
 		
 		var userInfo = data.userInfo;
 		var requestTime = data.requestTime;

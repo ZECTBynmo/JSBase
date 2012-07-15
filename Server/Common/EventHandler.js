@@ -57,7 +57,7 @@ var globalNamespace = {};
 
 //////////////////////////////////////////////////////////////////////////
 // Namespace (lol)
-var DEBUG = false;
+var DEBUG = true;
 var log = function( text ) {
 	if( DEBUG ) console.log( text ) ;
 }

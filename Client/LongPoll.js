@@ -24,7 +24,7 @@
 // Constructor
 function LongPoll() {
 	this.eventCallbacks = new Array();									// Our list of responses to events
-	this.numErrors;														// The number of errors our server has experienced
+	this.numErrors = 0;													// The number of errors our server has experienced
 	this.onTooManyErrors = function() {};								// Our response to having too many errors	
 	this.userInfo = {};													// Our description to the server (ID number, name, last message time, whatever)
 	
@@ -72,7 +72,7 @@ LongPoll.prototype.eventLoop = function( eventData ) {
 			
 				// If we find a callback that's listening for this event, call the callback
 				if( callback.eventName === eventData[iEvent].name ) {
-					callback.callback( eventData[iEvent] );
+					callback.callback( eventData[iEvent].data );
 				}
 			} // end for each callback
 		} // end for each event
