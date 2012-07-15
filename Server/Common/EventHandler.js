@@ -16,6 +16,7 @@
 	someClass.prototype.on = function( eventName, callback ) {
 		eventHandler.addEventCallback( eventName, callback );
 	}
+	
 */
 // To trigger an event, you can call "fireEvent( eventName )"
 //
@@ -28,6 +29,12 @@
 	var event = {
 		name: some name,
 		callbackList: some array of callbacks
+	}
+	
+	var eventTraits = {
+		callback: some callback (),
+		callbackScope: some scope {},
+		shouldCreateEvent: should we create a new even if we haven't heard of this eventName before
 	}
 	
 	var callback = {
@@ -85,12 +92,25 @@ EventHandler.prototype.deleteEvent = function( eventName ) {
 
 //////////////////////////////////////////////////////////////////////////
 // Adds a callback to an event's list
-EventHandler.prototype.addEventCallback = function( eventName, callback, callbackScope ) {
+EventHandler.prototype.addEventCallback = function( eventName, traits ) {
+	/*
+		traits = {
+			callback: some callback (),
+			callback scope: some scope {},
+			callbackIfNew: if this is the first time we've heard of eventName then call this,
+			shouldCreateEvent: should we create a new even if we haven't heard of this eventName before
+		}
+	*/
+	
+	if( typeof(traits) == "undefined" ) { 
+		log( "Tried to add a callback with no callback" );
+		return;
+	}
 
-	// Create our new callback
+	// Create our new callback (strip out traits elements that we don't need)
 	newCallback = {
-		callback: callback,
-		callbackScope: callbackScope
+		callback: traits.callback,
+		callbackScope: traits.callbackScope
 	}
 
 	// Push the new callback into the event callback list
@@ -98,7 +118,10 @@ EventHandler.prototype.addEventCallback = function( eventName, callback, callbac
 		log( "Adding callback for " + eventName );
 		this.eventList[eventName].callbackList.push( newCallback );
 	} else {
-		log( "Someone tried to sign up for an even that didnt exist: " + eventName );
+		if( traits.shouldCreateEvent ) { 
+			this.createEvent( eventName );
+			this.eventList[eventName].callbackList.push( newCallback );
+		}
 	}
 }; // end EventHandler.addEventCallback()
 
