@@ -61,6 +61,8 @@ var globalNamespace = {};
 		var newServer = new Server( port, host );
 		return newServer;
 	};
+	
+	exports.getConstructor = function() { return Server; };
 }(typeof exports === 'object' && exports || globalNamespace));
 
 
@@ -250,12 +252,18 @@ Server.prototype.createFileHandler = function( filename ) {
 
 //////////////////////////////////////////////////////////////////////////
 // Adds a callback to an HTTP event
-Server.prototype.on = function( eventPath, callback ) {
+Server.prototype.on = function( eventPath, callback, listenerName ) {
 	log( "Adding callback for " + eventPath );
+	
+	if( typeof(listenerName) == "undefined" ) { 
+		listenerName = ""; 
+	} else {
+		listenerName = listenerName + "/";
+	}
 	
 	// If the event name doesn't already begin with a /, put one on
 	if( eventPath.indexOf("/") != 0 ) {
-		eventPath = "/" + eventPath;
+		eventPath = "/" + listenerName + eventPath;
 	}
 	
 	// If this is the first time we've heard of this event, make a generic
