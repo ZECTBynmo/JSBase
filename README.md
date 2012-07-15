@@ -1,9 +1,12 @@
 JSBase
 ======
 
-*Base functionality for basic applications*
+*Base functionality for node.js applications*
 
 Server
+* Common        -- Shared files
+  * EventHandler   -- Generic event handling, used to setup myObject.on("someEvent", callback) for your class
+  * MimeLookup     -- Lookup table to map between file extensions and mime data types (eg: ".text" -> "text/html")
 * Long Poll			-- Effectively allows the server to push data down to the client
 * HTTPServer		-- Creates a server and allows easy/clean interaction
 * Chat  	      -- Uses LongPoll and HTTPServer to setup a chat server, sends all required files to client
