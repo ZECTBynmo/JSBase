@@ -3,8 +3,8 @@
 //////////////////////////////////////////////////////////////////////////
 //
 // We are trying to create a "channel" or "room" system. A user can join
-// a channel, and interact with users in that channel. We want it to have the
-// exact same API as the HTTPServer class as far as request handling
+// a channel, and interact with users in that channel. 
+//
 //
 // We have this process/flow for handling HTTP requests (top to bottom)
 //
@@ -32,15 +32,7 @@
 /* ----------------------------------------------------------------------
 													Object Structures
 -------------------------------------------------------------------------
-	var channelRequests = {
-		path: path,
-		clients: new Array( clients )
-	}
-	
-	var client = {
-		userInfo: userInfo,
-		response: responseCallback
-	}
+
 */
 //////////////////////////////////////////////////////////////////////////
 // Node.js Exports
@@ -49,28 +41,66 @@ var globalNamespace = {};
 	exports.createNewChannel = function( httpServer ) {
 		return new Channel( httpServer );
 	};
+	
+	exports.getConstructor = function() { return Channel; };
 }(typeof exports === 'object' && exports || globalNamespace));
 
 
 //////////////////////////////////////////////////////////////////////////
+// Namespace (lol)
+var eventHandlerImpl = require("./Common/EventHandler");
+	
+var DEBUG_LOG = false;
+
+var log = function( text ) {	// A log function we can turn off :/
+	if( DEBUG_LOG ) { console.log( text ); }
+}
+
+
+//////////////////////////////////////////////////////////////////////////
 // Constructor
-function Channel( httpServer ) {
+function Channel( parentServer ) {
 	this.name = "Channel";
 	this.channelRequests = {};
-	this.httpServer = httpServer;
+	this.parentServer = parentServer;
+	this.eventHandler = eventHandlerImpl.createNewEventHandler( this.name );
+
+	console.log( "pooop" );
 } // end Channel()
 
 
 //////////////////////////////////////////////////////////////////////////
-// Adds a request to the channel
-Chat.prototype.addRequestHandler = function( path, handler, shouldOverwrite ) {	
-	if( typeof(shouldOverwrite) == "undefined" ) {
-		shouldOverwrite = false;
+// Adds a callback to some event
+Channel.prototype.on = function( eventName, callback ) {	
+	log( "Adding callback for " + eventName );
+	
+	// If the event name doesn't already begin with a /, put one on
+	if( eventName.indexOf("/") != 0 ) {
+		eventName = "/" + eventName;
 	}
 	
-	// Check whether we have a response for this path for this user already
-	if( !shouldOverwrite ) {
-		
+	// Create our struct of event traits
+	eventTraits = {
+		callback: callback,
+		callbackIfNew: this.onNewEvent,
+		shouldCreateEvent: true
 	}
 	
+	// Add this event to our event handler
+	this.eventHandler.addEventCallback( eventName, eventTraits, this.name );
 } // end addRequestHandler()
+
+
+//////////////////////////////////////////////////////////////////////////
+// We want to add each event to our parent server the first time we get it
+// (and only the first)
+Channel.prototype.onNewEvent = function( eventName ) {	
+	this.parentServer.on( eventName, this.onEventFired );
+} // end onNewEvent()
+
+
+//////////////////////////////////////////////////////////////////////////
+// Fire the event in our event handler, so we call all of the callbacks attached to the event
+Channel.prototype.onEventFired = function( eventName, traits ) {	
+	this.eventHandler.fireEvent( eventData.eventName );
+}
