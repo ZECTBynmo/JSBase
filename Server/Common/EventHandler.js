@@ -121,6 +121,8 @@ EventHandler.prototype.addEventCallback = function( eventName, traits ) {
 		if( traits.shouldCreateEvent ) { 
 			this.createEvent( eventName );
 			this.eventList[eventName].callbackList.push( newCallback );
+			if( typeof(traits.callbackIfNew) != "undefined" )
+				traits.callbackIfNew( eventName );
 		}
 	}
 }; // end EventHandler.addEventCallback()
