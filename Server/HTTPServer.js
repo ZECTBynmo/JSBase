@@ -75,7 +75,7 @@ var createServer = require("http").createServer,
 	mime = require("./Common/MimeLookup"),
 	eventHandlerImpl = require("./Common/EventHandler");
 	
-var DEBUG_LOG = false;
+var DEBUG_LOG = true;
 
 var log = function( text ) {	// A log function we can turn off :/
 	if( DEBUG_LOG ) { console.log( text ); }
@@ -266,7 +266,12 @@ Server.prototype.on = function( eventPath, callback, listenerName ) {
 		eventPath = "/" + listenerName + eventPath;
 	}
 	
-	this.eventHandler.addEventCallback( eventPath, callback );
+	traits = {
+		callback: callback,
+		shouldCreateEvent: true
+	}
+	
+	this.eventHandler.addEventCallback( eventPath, traits );
 	
 	// If this is the first time we've heard of this event, make a generic
 	// handler for it, so the client will get something back if they make a
