@@ -111,7 +111,7 @@ function LongPoll( httpServer ) {
 //////////////////////////////////////////////////////////////////////////
 // Adds a function to callback for updates from some other module
 LongPoll.prototype.addEventUpdate = function( event ) {
-	log( "Got an event: " + event.name );
+	log( "LongPoll: Got an event: " + event.name );
 	
 	this.eventUpdates[event.name]= event;
 	
@@ -157,6 +157,8 @@ LongPoll.prototype.getUserUpdates = function( userInfo, requestTime ) {
 //////////////////////////////////////////////////////////////////////////
 // Respond to queued user requests with new events
 LongPoll.prototype.dispatchQueuedRequests = function( event ) {
+	log( "LongPoll: Dispatching event " + require("util").inspect(event) );
+	
 	for( var iRequest=0; iRequest<this.queuedUserRequests.length; ++iRequest ) {
 		var userRequest = this.queuedUserRequests[iRequest];
 		// Construct our event response
