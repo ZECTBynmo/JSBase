@@ -92,7 +92,8 @@ EventHandler.prototype.deleteEvent = function( eventName ) {
 
 //////////////////////////////////////////////////////////////////////////
 // Adds a callback to an event's list
-EventHandler.prototype.addEventCallback = function( eventName, traits ) {
+EventHandler.prototype.addEventCallback = function( eventName, callbackOrTraits ) {
+	var traits = {};
 	/*
 		traits = {
 			callback: some callback (),
@@ -102,49 +103,72 @@ EventHandler.prototype.addEventCallback = function( eventName, traits ) {
 		}
 	*/
 	
-	if( typeof(traits) == "undefined" ) { 
+	if( typeof(callbackOrTraits) == "undefined" ) { 
 		log( "Tried to add a callback with no callback" );
 		return;
 	}
+	
+	// Construct our traits based on what we were given
+	if( typeof(callbackOrTraits) == "function" ) {
+		// We were given a callback
+		traits.callback = callbackOrTraits;
+	} else {
+		// We were given some traits
+		traits = callbackOrTraits;
+	}
 
-	// Create our new callback (strip out traits elements that we don't need)
+	// Create our new callback
 	newCallback = {
 		callback: traits.callback,
 		callbackScope: traits.callbackScope
 	}
+	
+	console.log( require("util").inspect(traits) );
 
 	// Push the new callback into the event callback list
-	if( this.eventList[eventName] ) {
+	var event = this.eventList[eventName];
+	if( typeof(event) != "undefined" ) {
 		log( "Adding callback for " + eventName );
-		this.eventList[eventName].callbackList.push( newCallback );
+		event.callbackList.push( newCallback );
 	} else {
 		if( traits.shouldCreateEvent ) { 
 			this.createEvent( eventName );
-			this.eventList[eventName].callbackList.push( newCallback );
+			event.callbackList.push( newCallback );
 			if( typeof(traits.callbackIfNew) != "undefined" )
 				traits.callbackIfNew( eventName );
+		} else {
+			console.log( "Didn't create event " + eventName );
 		}
 	}
+	
+	delete newCallback;
 }; // end EventHandler.addEventCallback()
 
 
 //////////////////////////////////////////////////////////////////////////
 // Call all callback functions attached to an event
 EventHandler.prototype.fireEvent = function( eventName, data ) {
+	var event = this.eventList[eventName];
+	var callbackList = event.callbackList;
+	
 	// Just return if we don't have this event yet
-	if( typeof(this.eventList[eventName]) == "undefined" ) {
+	if( typeof(event) == "undefined" ) {
 		log( "Tried to fire a " + this.name + " event that didn't exist: " + eventName );
 		log( "It had data: " + require("util").inspect(data) );
 		return;
 	}
 	
-	log( this.name + " event fired: " + eventName + " with " + this.eventList[eventName].callbackList.length + " callbacks" );
+	log( this.name + " event fired: " + eventName + " with " + callbackList.length + " callbacks" );
 
-	for( iCallback=0; iCallback<this.eventList[eventName].callbackList.length; ++iCallback ) {
-		if( typeof(this.eventList[eventName].callbackList[iCallback].callbackScope) == "undefined" ) {
-			this.eventList[eventName].callbackList[iCallback].callback( data );
+	for( var iCallback=0; iCallback<callbackList.length; ++iCallback ) {
+		var callback = callbackList[iCallback];
+	
+		if( typeof( callback.callback ) != "function" ) console.log( require("util").inspect(callback) );
+	
+		if( typeof(callback.callbackScope) == "undefined" ) {
+			callback.callback( data );
 		} else {
-			this.eventList[eventName].callbackList[iCallback].callback( this.eventList[eventName].callbackList[iCallback].callbackScope, data );
+			callback.callback( data, callback.callbackScope );
 		}
 	}
 }; // end EventHandler.fireEvent()
