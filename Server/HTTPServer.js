@@ -91,7 +91,7 @@ function Server( port, host ) {
 	var self = this;
 	
 	// Create a server using the built in Node http module and declare our response to client requests
-	this.server = createServer(function (request, response) {	
+	this.server = createServer(function (request, response) {		
 		if( typeof(self.requestHandlers) === "undefined" ) { log("no request handlers"); return; }
 	
 		// Handle GET requests
@@ -266,7 +266,7 @@ Server.prototype.on = function( eventPath, callback, listenerName ) {
 		eventPath = "/" + listenerName + eventPath;
 	}
 	
-	traits = {
+	var traits = {
 		callback: callback,
 		shouldCreateEvent: true
 	}
