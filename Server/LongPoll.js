@@ -95,14 +95,13 @@ function LongPoll( httpServer ) {
 	// Clear out old user requests
 	// They can hang around for at most REQUEST_LIFETIME_MS
 	setInterval(function () {
-		/*
-		if( !this.m_callbacks || !this.m_messages ) return;
+		if( !this.queuedUserRequests || !this.eventUpdates ) return;
 		
 		var now = new Date();
-		while ( this.m_callbacks.length > 0 && now - this.m_callbacks[0].timestamp > REQUEST_LIFETIME_MS ) {
-			this.m_callbacks.shift().callback([]);
+		while ( this.queuedUserRequests.length > 0 && now - this.queuedUserRequests[0].time > REQUEST_LIFETIME_MS ) {
+			log( "Clearing out an old request" );
+			this.queuedUserRequests.shift().respond([]);
 		}
-		*/
 	}, 3000);
 	
 } // end LongPoll()
