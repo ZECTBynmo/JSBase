@@ -118,7 +118,7 @@ EventHandler.prototype.addEventCallback = function( eventName, callbackOrTraits 
 	}
 
 	// Create our new callback
-	newCallback = {
+	var newCallback = {
 		callback: traits.callback,
 		callbackScope: traits.callbackScope
 	}
@@ -133,7 +133,7 @@ EventHandler.prototype.addEventCallback = function( eventName, callbackOrTraits 
 	} else {
 		if( traits.shouldCreateEvent ) { 
 			this.createEvent( eventName );
-			event.callbackList.push( newCallback );
+			this.eventList[eventName].callbackList.push( newCallback );
 			if( typeof(traits.callbackIfNew) != "undefined" )
 				traits.callbackIfNew( eventName );
 		} else {
@@ -149,7 +149,6 @@ EventHandler.prototype.addEventCallback = function( eventName, callbackOrTraits 
 // Call all callback functions attached to an event
 EventHandler.prototype.fireEvent = function( eventName, data ) {
 	var event = this.eventList[eventName];
-	var callbackList = event.callbackList;
 	
 	// Just return if we don't have this event yet
 	if( typeof(event) == "undefined" ) {
@@ -157,6 +156,8 @@ EventHandler.prototype.fireEvent = function( eventName, data ) {
 		log( "It had data: " + require("util").inspect(data) );
 		return;
 	}
+	
+	var callbackList = event.callbackList;
 	
 	log( this.name + " event fired: " + eventName + " with " + callbackList.length + " callbacks" );
 
