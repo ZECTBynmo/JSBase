@@ -191,7 +191,7 @@ Server.prototype.createGenericHandler = function( callback, isDataExpected ) {
 		// Give that function to the module/code using the generic handler
 		var responseData;
 		if( typeof(callback) != "undefined" ) {
-			responseData = callback( respondToClient, data );
+			responseData = callback( data, respondToClient );
 		} else { log("callback is undefined" ); }
 		
 		// If we haven't responded to the client already, and we returned

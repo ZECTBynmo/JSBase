@@ -71,18 +71,21 @@ function Chat( httpServer, channel, longPoll, newChatString ) {
 Chat.prototype.createOnChat = function( respondToClient, data ) {
 	var self = this;
 	
-	var onChat = function( data ) {
+	var onChat = function( respondToClient, data ) {
 		console.log( data );
 	
 		// Create a new event to report to LongPoll
 		var event = {
-			name: self.newChatString, 	// The name of this event (must be unique)
-			module: self.moduleName,	// The name of the module that triggered this event
-			time: new Date(),			// The time at which this event was triggered
-			data: data			
+			"name": self.newChatString, 	// The name of this event (must be unique)
+			"module": self.moduleName,	// The name of the module that triggered this event
+			"time": new Date(),			// The time at which this event was triggered
+			"data": data			
 		}		
 		
+		require("util").inspect(event);
+		
 		self.longPoll.addEventUpdate( event );
+		respondToClient();
 	}
 	
 	return onChat;

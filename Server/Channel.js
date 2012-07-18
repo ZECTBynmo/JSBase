@@ -90,19 +90,19 @@ Channel.prototype.on = function( eventName, callback ) {
 	this.eventHandler.addEventCallback( eventName, eventTraits, this.name );
 	
 	// Get this event from our parent
-	this.parentServer.on( eventName, this.getCallback() );
+	this.parentServer.on( eventName, this.getCallback(eventName) );
 } // end addRequestHandler()
 
 
 //////////////////////////////////////////////////////////////////////////
 // Returns a function that the server will call when it receives an event
 // that we've registered for
-Channel.prototype.getCallback = function() {
+Channel.prototype.getCallback = function( eventName ) {
 	var self = this;
 	
-	var callback = function( eventName ) {
+	var callback = function() {
 		self.eventHandler.fireEvent( eventName );
-		log( "Channel: Got event: " + eventName );
+		log( "Channel: Got event: " + eventName);
 	}
 	
 	return callback;

@@ -95,6 +95,7 @@ function LongPoll( httpServer ) {
 	// Clear out old user requests
 	// They can hang around for at most REQUEST_LIFETIME_MS
 	setInterval(function () {
+	/*
 		if( !this.queuedUserRequests || !this.eventUpdates ) return;
 		
 		var now = new Date();
@@ -102,6 +103,7 @@ function LongPoll( httpServer ) {
 			log( "Clearing out an old request" );
 			this.queuedUserRequests.shift().respond([]);
 		}
+		*/
 	}, 3000);
 	
 } // end LongPoll()
@@ -163,6 +165,11 @@ LongPoll.prototype.dispatchQueuedRequests = function( event ) {
 		// Construct our event response
 		var response = {};
 		response[event.name] = event;
+		
+		if( typeof(userRequest.respond != "function") ) {
+			console.log( "The respond function is:" ); 
+			console.log( require("util").inspect(userRequest.respond) );
+		}
 	
 		userRequest.respond( response );
 	} // end for each user request

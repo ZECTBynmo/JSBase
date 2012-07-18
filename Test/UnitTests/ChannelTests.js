@@ -32,8 +32,8 @@ var runTests = function() {
 			
 			channel.on( "/test", function() {
 				hasResponded = true;
-				assert.equal( true, hasResponded );
-				console.log( "Tests: Callback from /test" );
+				assert.equal( true, true );
+				console.log( "ChannelTests: Callback from /test" );
 				done(); 
 			});
 		});
