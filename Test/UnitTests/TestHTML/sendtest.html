@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+	<head>
+		<script src="jquery-1.7.1.min.js" type="text/javascript"></script>				
+		<script type="text/javascript">			
+			$(document).ready(function() {
+				jQuery.get("/test", {}, function (data, status) {
+					// We just requested "/test"
+					// NOTHING TO SEE HERE
+				}, "json");				
+			});
+		</script>
+	</head>
+	<body></body>	
+</html>
