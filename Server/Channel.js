@@ -80,7 +80,7 @@ Channel.prototype.on = function( eventName, callback ) {
 	}
 	
 	// Create our struct of event traits
-	eventTraits = {
+	var eventTraits = {
 		callback: callback,
 		callbackIfNew: this.getOnNew(eventName),
 		shouldCreateEvent: true
@@ -88,7 +88,25 @@ Channel.prototype.on = function( eventName, callback ) {
 	
 	// Add this event to our event handler
 	this.eventHandler.addEventCallback( eventName, eventTraits, this.name );
+	
+	// Get this event from our parent
+	this.parentServer.on( eventName, this.getCallback() );
 } // end addRequestHandler()
+
+
+//////////////////////////////////////////////////////////////////////////
+// Returns a function that the server will call when it receives an event
+// that we've registered for
+Channel.prototype.getCallback = function() {
+	var self = this;
+	
+	var callback = function( eventName ) {
+		self.eventHandler.fireEvent( eventName );
+		log( "Channel: Got event: " + eventName );
+	}
+	
+	return callback;
+} // end getCallback()
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -119,10 +137,12 @@ Channel.prototype.getOnEventFired = function( eventName ) {
 	var eventName = eventName;
 	
 	var onEventFired = function( respond, data ) {	
-		console.log( eventName );
+		console.log( this.name + ": Event " + eventName + " fired" );
 	
 		// Subtract our prefix
-		eventName = eventName.substring(("/" + self.name).length);
+		if( eventName.indexOf(self.name) != -1 ) {
+			eventName = eventName.substring(("/" + self.name).length);
+		}
 
 		self.eventHandler.fireEvent( eventName, data );
 	}
