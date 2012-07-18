@@ -67,7 +67,7 @@ function LongPoll( httpServer ) {
 	
 	// Add our long poll request handler to the server
 	var self = this;
-	httpServer.addRequestHandler( "/longPollRequest", httpServer.createGenericHandler(function( respondToClient, data ) {
+	httpServer.addRequestHandler( "/longPollRequest", httpServer.createGenericHandler(function( data, respondToClient ) {
 		log( "Got LongPoll request from " + util.inspect(data) );
 		
 		var userInfo = data.userInfo;
@@ -162,15 +162,16 @@ LongPoll.prototype.dispatchQueuedRequests = function( event ) {
 	
 	for( var iRequest=0; iRequest<this.queuedUserRequests.length; ++iRequest ) {
 		var userRequest = this.queuedUserRequests[iRequest];
+		
 		// Construct our event response
 		var response = {};
 		response[event.name] = event;
 		
-		if( typeof(userRequest.respond != "function") ) {
-			console.log( "The respond function is:" ); 
-			console.log( require("util").inspect(userRequest.respond) );
-		}
-	
-		userRequest.respond( response );
+		if( typeof(userRequest.respond === "function") ) {
+			userRequest.respond( response );
+		} else {			
+			console.log( "LongPoll: The respond function is:" ); 
+			console.log( userRequest.respond );
+		}		
 	} // end for each user request
 } // end dispatchQueuedRequests()
