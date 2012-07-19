@@ -136,8 +136,8 @@ Channel.prototype.getOnEventFired = function( eventName ) {
 	var self = this;
 	var eventName = eventName;
 	
-	var onEventFired = function( respond, data ) {	
-		console.log( this.name + ": Event " + eventName + " fired" );
+	var onEventFired = function( data, respond ) {	
+		console.log( self.name + ": Event " + eventName + " fired" );
 	
 		// Subtract our prefix
 		if( eventName.indexOf(self.name) != -1 ) {
