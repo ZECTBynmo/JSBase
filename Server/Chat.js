@@ -71,7 +71,7 @@ function Chat( httpServer, channel, longPoll, newChatString ) {
 Chat.prototype.createOnChat = function( respondToClient, data ) {
 	var self = this;
 	
-	var onChat = function( respondToClient, data ) {
+	var onChat = function( data, respondToClient ) {
 		console.log( data );
 	
 		// Create a new event to report to LongPoll
@@ -85,7 +85,12 @@ Chat.prototype.createOnChat = function( respondToClient, data ) {
 		require("util").inspect(event);
 		
 		self.longPoll.addEventUpdate( event );
-		respondToClient();
+		if( typeof(respondToClient) === "function" ) {
+			respondToClient();
+		} else {
+			log( "Undefined response to client, actual structure is: " + respondToClient );
+		}
+		
 	}
 	
 	return onChat;
