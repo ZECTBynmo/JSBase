@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+	<head>
+		<TITLE>Send Test String</TITLE>
+		<script src="jquery-1.7.1.min.js" type="text/javascript"></script>				
+		<script type="text/javascript">			
+			$(document).ready(function() {
+				jQuery.get("/whatTestString", {}, function (data, status) {
+					// If we succeeded request the test string from the server
+					jQuery.get( data.testString, {}, function (data, status) {
+						// Yay, we did it.
+					}, "json");	
+				}, "json");				
+			});
+		</script>
+	</head>
+	<body></body>	
+</html>
