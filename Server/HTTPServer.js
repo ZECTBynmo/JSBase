@@ -331,7 +331,7 @@ Server.prototype.serveFile = function( clientPath, serverPath ) {
 	}
 		
 	this.addRequestHandler( clientPath, this.createFileHandler(serverPath) );
-}; // end Server.addGenericHandler()
+}; // end Server.serveFile()
 
 
 //////////////////////////////////////////////////////////////////////////
