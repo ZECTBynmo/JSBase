@@ -6,13 +6,13 @@
 // GET/POST/etc... handling should be put here.
 //
 // Disclaimer: I have no idea what I'm talking about, but this is my working 
-// knowledge of how this stuff works - MV
+// knowledge of how this stuff works - Mike
 //
 // HTTP Requests come in as a request and response pair. The request holds
-// the url path that the user is requesting (eg. "/index.html"). The response is
-// a callback that we'll eventally call to return a success/fail value to the
-// client that sent it. We can also attach data to the response before we send
-// it back.
+// the url path that the user is requesting (eg. "/index.html"), along with any
+// data the user is sending. The response is a callback that we'll eventally call 
+// to return a success/fail value to the client that sent it. We can also 
+// attach data to the response before we send it back.
 // 
 // Request types
 // GET: insecure - 1024 max characters in some browsers (can press back and have it work)
