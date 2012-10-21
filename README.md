@@ -1,6 +1,10 @@
 JSBase
 ======
 
+This repository holds all of my base/boilerplate javascript code for Node.js applications from before I knew about socket.io
+
+I don't use this code anymore, and you probably shouldn't either. However, I was pretty proud of the long poll based system when I was using it, so I figured it would be cool to open source it.
+
 *Base functionality for node.js applications*
 
 Server
